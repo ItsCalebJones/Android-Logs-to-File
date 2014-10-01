@@ -1,4 +1,10 @@
-############################### WELCOME ########################################
+############################### GLOBAL VARIABLES ################################
+
+DATE=`date +%m_%d_%y`
+now=$(date +"%H-%M-%S")
+filesize=0
+
+################################### WELCOME ####################################
 # Startup Script to let the user know what the function does.
 ScriptTopperC(){
 	clear
@@ -91,10 +97,6 @@ echo
 sleep .5
 read -p "Please press enter to continue to menu."
 Menu
-
-#[ro.build.version.release]: [4.4.2]
-#[ro.com.google.clientidbase.am]: [android-tmobile-us]
-#[gsm.operator.alpha]: [T-Mobile]
 }
 
 ################################################################################
@@ -176,7 +178,6 @@ done
 	sleep 2
 	clear
 	tail -f ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt | grep $UserInput
-		clear
 		echo "ERROR: Device was disconnected. Restarting. Please wait.."
 		echo
 		echo
@@ -241,5 +242,6 @@ Menu(){
 }
 
 #ScriptTopper #Welcome Dialog
-ScriptTopperC #Verifies Device is connected
+clear
+StartUp #Verifies Device is connected
 Menu
