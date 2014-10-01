@@ -1,10 +1,10 @@
-############################### GLOBAL VARIABLES ################################
+######################### GLOBAL VARIABLES #####################################
 
 DATE=`date +%m_%d_%y`
 now=$(date +"%H-%M-%S")
 filesize=0
 
-################################### WELCOME ####################################
+############################### WELCOME ########################################
 # Startup Script to let the user know what the function does.
 ScriptTopperC(){
 	clear
@@ -55,9 +55,9 @@ Condition
 
 ################################################################################
 
-#Logic for determining if device is connected by reading output of ADB Devices
+#Logic for determining if device is connected by reading output of adb Devices
 Condition(){
-#HISTORICAL COMMENT: This is a messy way of finding out if there is a device connected. The problem was with locating a Android ID in a returned 'ADB Devices' string.
+#HISTORICAL COMMENT: This is a messy way of finding out if there is a device connected. The problem was with locating a Android ID in a returned 'adb Devices' string.
 #HISTORICAL COMMENT: This looks for numbers, if theres a number in the string then there is a Device connected, possible to have bugs here where theres a Device ID without a 0, 2, or 3.
 #CODE HISTORICAL COMMENTS WAS REFERENCING HAS BEEN REMOVED FOR READER'S SANITY
 #Compares file size of tmp to see if it contains any devices. If so, run. Else, prompt user.
@@ -83,13 +83,19 @@ fi
 
 #Fetches device details and logs them into variables.
 GetDeviceData(){
+
+#This gets information about the device
 ProductBrand=$(adb shell getprop ro.product.brand | tr -d \\r)
 Provider=$(adb shell getprop gsm.operator.alpha | tr -d \\r)
 Model=$(adb shell getprop ro.product.model | tr -d \\r)
 OSVersion=$(adb shell getprop ro.build.version.release | tr -d \\r)
+InstalledAPKs=$(adb shell pm list packages)
+
+#This edits the strings to make is more readable
 ProductBrand="$(tr '[:lower:]' '[:upper:]' <<< ${ProductBrand:0:1})${ProductBrand:1}"
 Device="$(tr '[:lower:]' '[:upper:]' <<< ${Device:0:1})${Device:1}"
 Model="$(tr '[:lower:]' '[:upper:]' <<< ${Model:0:1})${Model:1}"
+
 
 pM="$Provider - $ProductBrand $Model v$OSVersion"
 echo $pM "is connected."
@@ -107,9 +113,9 @@ if [ ! -d ~/Documents/Android ]; then
 # Control will enter here if $DIRECTORY doesn't exist.+
 mkdir ~/Documents/Android
 fi
-if [ ! -d ~/Documents/Android/Logs$DATE ]; then
+if [ ! -d ~/Documents/Android/Logs_$DATE ]; then
 # Control will enter here if $DIRECTORY doesn't exist.+
-mkdir ~/Documents/Android/Logs$DATE
+mkdir ~/Documents/Android/Logs_$DATE
 fi
 }
 
@@ -134,15 +140,22 @@ LoggingNoTag(){
 
 	sleep 1
 	{
-		adb logcat > ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt 
+		echo $pM > ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo " " >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo "Installed Apps:" >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo $InstalledAPKs | tr -d ' ' >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo " " >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+
+		sleep 1
+		adb logcat >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt 
 		kill $(ps aux | grep 'tail -f')
 	}&
 
-		sleep 2
+		sleep 3
 	
 		clear
 	
-		tail -f  ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt
+		tail -f  ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
 		clear
 		echo "ERROR: Device was disconnected. Restarting. Please wait.."
 		echo
@@ -170,14 +183,19 @@ done
 	read -p "Please press enter to continue: "
 	clear
 	{
-		adb logcat > ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt
+		echo $pM > ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo " " >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo $InstalledAPKs | tr -d ' ' >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		echo " " >> ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
+		adb logcat > ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt
 	echo
 	echo "Device is disconnected..."
 	kill $(ps aux | grep 'tail -f')
 	}&
 	sleep 2
 	clear
-	tail -f ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt | grep $UserInput
+	tail -f ~/Documents/Android/Logs_"$DATE"/"$now"_"$Model"_Logs.txt | grep $UserInput
+		clear
 		echo "ERROR: Device was disconnected. Restarting. Please wait.."
 		echo
 		echo
