@@ -1,4 +1,8 @@
 Android-Logs-to-File
 ====================
 
-This script has some utilities for adding text files, installing/uninstalling applications and logging to file.
+A script to create a directory and retreive logs from an Android device.
+
+Features:
+
+Release v1.0
