@@ -1,5 +1,3 @@
-!/bin/bash
-
 ############################### WELCOME ########################################
 # Startup Script to let the user know what the function does.
 ScriptTopper() {
@@ -73,28 +71,18 @@ fi
 ################################################################################
 
 #Fetches device details and logs them into variables.
-#TO DO change the awk to actually edit the variable.
 GetDeviceData(){
-ProductBrand=$(adb shell getprop ro.product.brand)
-Provider=$(adb shell getprop gsm.operator.alpha)
-Device=$(adb shell getprop ro.product.device)
-Model=$(adb shell getprop ro.product.model)
-ProductModel=$ProductBrand}" "${Model}
-#TestS= $Provider$Device
-#ProductBrand=`echo ${ProductBrand:0:1} | tr  '[a-z]' '[A-Z]'`${ProductBrand:1}
-#Device=`echo ${Device:0:1} | tr  '[a-z]' '[A-Z]'`${Device:1}
-#ProductBrand=${ProductBrand:0:${#ProductBrand}-1}
-#ProductBrand=${ProductBrand/ /}
-#Model=${Model:0:${#Model}-1}
-#Model=${Model/ /}
-echo  "$ProductBrand - $Model is connected..."
-# echo $ProductBrand
-# echo $Provider
-# echo $Device
-echo $Model$Device
-echo $ProductModel
-#echo $TestS
-#echo $Model
+ProductBrand=$(adb shell getprop ro.product.brand | tr -d \\r)
+Device=$(adb shell getprop ro.product.device | tr -d \\r)
+Provider=$(adb shell getprop gsm.operator.alpha | tr -d \\r)
+Model=$(adb shell getprop ro.product.model | tr -d \\r)
+OSVersion=$(adb shell getprop ro.build.version.release | tr -d \\r)
+ProductBrand="$(tr '[:lower:]' '[:upper:]' <<< ${ProductBrand:0:1})${ProductBrand:1}"
+Device="$(tr '[:lower:]' '[:upper:]' <<< ${Device:0:1})${Device:1}"
+
+pM="$Provider - $ProductBrand $Model v$OSVersion"
+echo $pM " is connected."
+echo
 
 #[ro.build.version.release]: [4.4.2]
 #[ro.com.google.clientidbase.am]: [android-tmobile-us]
