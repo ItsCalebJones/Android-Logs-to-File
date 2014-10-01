@@ -1,3 +1,5 @@
+!/bin/bash
+
 ############################### WELCOME ########################################
 # Startup Script to let the user know what the function does.
 ScriptTopper() {
@@ -85,7 +87,7 @@ ProductModel=$ProductBrand}" "${Model}
 #ProductBrand=${ProductBrand/ /}
 #Model=${Model:0:${#Model}-1}
 #Model=${Model/ /}
-#echo  "$ProductBrand - $Model is connected..."
+echo  "$ProductBrand - $Model is connected..."
 # echo $ProductBrand
 # echo $Provider
 # echo $Device
