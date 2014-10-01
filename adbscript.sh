@@ -1,7 +1,11 @@
 ############################### WELCOME ########################################
 # Startup Script to let the user know what the function does.
+ScriptTopperC(){
+	clear
+	ScriptTopper
+}
+
 ScriptTopper() {
-clear
 echo "=========================================================================="
 echo "/                                                                        \""
 echo "/                                Welcome!                                \""
@@ -22,6 +26,7 @@ echo
 
 #Checks for device and loops until its found.
 StartUp(){
+ScriptTopper
 echo
 read -p "Press [Enter] key when device is connected via USB..."
 echo
@@ -73,16 +78,19 @@ fi
 #Fetches device details and logs them into variables.
 GetDeviceData(){
 ProductBrand=$(adb shell getprop ro.product.brand | tr -d \\r)
-Device=$(adb shell getprop ro.product.device | tr -d \\r)
 Provider=$(adb shell getprop gsm.operator.alpha | tr -d \\r)
 Model=$(adb shell getprop ro.product.model | tr -d \\r)
 OSVersion=$(adb shell getprop ro.build.version.release | tr -d \\r)
 ProductBrand="$(tr '[:lower:]' '[:upper:]' <<< ${ProductBrand:0:1})${ProductBrand:1}"
 Device="$(tr '[:lower:]' '[:upper:]' <<< ${Device:0:1})${Device:1}"
+Model="$(tr '[:lower:]' '[:upper:]' <<< ${Model:0:1})${Model:1}"
 
 pM="$Provider - $ProductBrand $Model v$OSVersion"
-echo $pM " is connected."
+echo $pM "is connected."
 echo
+sleep .5
+read -p "Please press enter to continue to menu."
+Menu
 
 #[ro.build.version.release]: [4.4.2]
 #[ro.com.google.clientidbase.am]: [android-tmobile-us]
@@ -118,5 +126,120 @@ done
 
 ################################################################################
 
-ScriptTopper #Welcome Dialog
-StartUp #S
+LoggingNoTag(){
+	read -p "Logging is about to start. Press enter to continue: "
+	clear
+
+	sleep 1
+	{
+		adb logcat > ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt 
+		kill $(ps aux | grep 'tail -f')
+	}&
+
+		sleep 2
+	
+		clear
+	
+		tail -f  ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt
+		clear
+		echo "ERROR: Device was disconnected. Restarting. Please wait.."
+		echo
+		echo
+		sleep 1
+		StartUp
+	}
+
+################################################################################
+
+#Multithreading function that starts logging and then reading the file while grepping for users input.
+LoggingWithTag(){
+	sleep 1
+	echo "Please enter the string tag to filter logs by. "
+	read UserInput
+	while true; do
+	echo
+    read -p "Log's will be filtered by '$UserInput' is this correct?" yn
+    case $yn in
+        [Yy]* ) echo "Yes"; break;;
+        [Nn]* ) echo "No"; StartLoggingTagCustom;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+	read -p "Please press enter to continue: "
+	clear
+	{
+		adb logcat > ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt
+	echo
+	echo "Device is disconnected..."
+	kill $(ps aux | grep 'tail -f')
+	}&
+	sleep 2
+	clear
+	tail -f ~/Documents/Android/Logs"$DATE"/"$now"_"$Model"_Logs.txt | grep $UserInput
+		clear
+		echo "ERROR: Device was disconnected. Restarting. Please wait.."
+		echo
+		echo
+		sleep 1
+		StartUp
+}
+
+################################################################################
+
+adbCommandFM(){
+	#Clears screen when called from Menu then calls adbCommand
+		clear
+		adbCommand
+}
+
+adbCommand(){
+	#Actual adb command function
+
+	command=""
+
+	#sleepCounter is a random number between .1 and .9 - This is just for fun.
+	sleepCounter=$[1 + ($[RANDOM%9])]
+	sleepCounter=0.$sleepCounter
+	echo "Please enter adb command without adb prefix. Enter 'back' to go back to menu."
+	read command
+	echo
+	#Fluff to account for randomized sleep interval.
+    echo "Processing command. Please wait.."
+
+    #Without this command, statement loops back to Menu. You can replace sleepCounter with 0
+	sleep $sleepCounter
+
+	if [ $command = "back" ]; then
+		Menu
+	fi
+
+	adb $command
+
+	adbCommand
+}
+
+Menu(){
+ 	option="null"
+
+ 	until [ $option = $return ]; do
+ 		clear;
+ 		ScriptTopper
+ 		echo "1) Start Logging(No Tag) "
+		echo "2) Start Logging(With Tag) "
+		echo "3) adb Commands"
+		#echo "4) Uninstall Application"
+ 		read -p "Please choose an option: " option
+
+ 		# Case statement to determine which function to run
+
+ 		case $option in
+ 			1) LoggingNoTag;;
+            2) LoggingWithTag;;
+			3) adbCommandFM;;
+ 		esac
+ 	done
+}
+
+#ScriptTopper #Welcome Dialog
+ScriptTopperC #Verifies Device is connected
+Menu
